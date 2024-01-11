@@ -36,3 +36,4 @@ class UserPageLocators(PageLocators):
     device_title = (By.XPATH, '//h2/span[contains(text(),"Device")]')
     devices_list = (By.XPATH, '//iframe[contains(@name, "DevicesList.ReactView")]')
     device_row = (By.XPATH, '//div[contains(@class, "ms-DetailsRow-fields")]')
+    no_device_info = (By.XPATH, '//label[contains(text(),"No results")]')

@@ -42,16 +42,27 @@ class UserPage(Page):
                 is_overwrite=True)
             self.wait_element_to_be_visible(*self.locator.device_title)
             self.wait_frame_to_be_visible(*self.locator.devices_list)
-            self.wait_element_to_be_visible(*self.locator.device_row)
-            elements = self.driver.find_elements(*self.locator.device_row)
-            for element in elements:
-                html_code = element.get_attribute('outerHTML')
-                device_detail = self.get_device_detail(html_code)
-                device_info.append(device_detail)
+            if self.is_device_info():
+                elements = self.driver.find_elements(*self.locator.device_row)
+                for element in elements:
+                    html_code = element.get_attribute('outerHTML')
+                    device_detail = self.get_device_detail(html_code)
+                    device_info.append(device_detail)
         if device_info:
             for device in device_info:
                 device['Email'] = email
         return device_info
+
+    def is_device_info(self):
+        try:
+            self.wait_element_to_be_visible(*self.locator.device_row)
+            return True
+        except TimeoutException:
+            try:
+                self.wait_element_to_be_visible(*self.locator.no_device_info)
+                return False
+            except NoSuchElementException as exception:
+                Screenshot.take_screenshot(self.driver, 'no_such_element')
 
     def wait_users_page_title_to_be_visible(self, max_retries=6):
         for _ in range(max_retries):

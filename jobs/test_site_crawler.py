@@ -1,5 +1,3 @@
-import ast
-
 import allure
 import pandas as pd
 import pytest
