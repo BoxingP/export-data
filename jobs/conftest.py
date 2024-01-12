@@ -30,3 +30,13 @@ def screenshot_on_failure(request):
         current_test = request.node.name.split(':')[-1].split(' ')[0].lower()
         driver = request.cls.driver
         Screenshot.take_screenshot(driver, 'test call failed', test=current_test)
+
+
+def pytest_addoption(parser):
+    parser.addoption('--email-list', action='store', dest='email_list_str', default=None,
+                     help='users emails list')
+
+
+@pytest.fixture
+def email_list_str(request):
+    return request.config.option.email_list_str

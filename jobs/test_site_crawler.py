@@ -15,12 +15,6 @@ class TestSiteCrawler:
     reruns = config.JOB_RERUNS
     reruns_delay = config.JOB_RERUNS_DELAY
 
-    def get_email_list(self):
-        data_path = config.EMAIL_LIST_FILE_PATH
-        df = ExcelFile(data_path.name, data_path).import_excel_to_dataframe()
-        email_list = df['Email'].tolist()
-        return email_list
-
     def generate_report(self, device_list):
         df = pd.DataFrame(device_list)
         column_mapping = config.DEVICE_COLUMN_MAPPING
@@ -39,16 +33,16 @@ class TestSiteCrawler:
     @pytest.mark.flaky(reruns=reruns, reruns_delay=reruns_delay)
     @allure.title('Download mem report test')
     @allure.description('This is test of download mem report')
-    def test_download_mem_report(self):
+    def test_download_mem_report(self, email_list_str):
         base_url = get_base_url_by_job_name(config.JOB_LIST, get_current_function_name())
         user_page = UserPage(self.driver, base_url)
         user_page.open_page(wait_element=LoginPageLocators.msft_logo_img)
         login_page = LoginPage(self.driver, base_url)
         login_page.login(user='mem', wait_element=HomePageLocators.msft_user_info_button)
         device_list = []
-        email_list = self.get_email_list()
-        for email in email_list:
+        for email in email_list_str.split(','):
             user_page.open_page(url='#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers')
             device_info = user_page.get_device_info(email=email)
             device_list.extend(device_info)
-        self.generate_report(device_list)
+        if device_list:
+            self.generate_report(device_list)
