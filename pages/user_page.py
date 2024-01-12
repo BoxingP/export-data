@@ -17,7 +17,7 @@ class UserPage(Page):
     def __init__(self, driver, base_url):
         super(UserPage, self).__init__(driver, base_url)
         self.locator = UserPageLocators
-        self.timeout = 40
+        self.timeout = 20
 
     def wait_element_to_be_visible(self, *locator):
         WebDriverWait(self.driver, timeout=self.timeout).until(EC.visibility_of_element_located(locator))
@@ -40,9 +40,11 @@ class UserPage(Page):
             self.open_page(
                 url=f'https://intune.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/Devices/userId/{user_id}/hidePreviewBanner~/true',
                 is_overwrite=True)
-            self.wait_element_to_be_visible(*self.locator.device_title)
+            super().wait_element_to_be_visible(*self.locator.device_title)
             self.wait_frame_to_be_visible(*self.locator.devices_list)
+            self.wait_element_to_be_invisible(*self.locator.loading_bar)
             if self.is_device_info():
+                super().wait_element_to_be_visible(*self.locator.device_row)
                 elements = self.driver.find_elements(*self.locator.device_row)
                 for element in elements:
                     html_code = element.get_attribute('outerHTML')
@@ -55,14 +57,21 @@ class UserPage(Page):
 
     def is_device_info(self):
         try:
-            self.wait_element_to_be_visible(*self.locator.device_row)
+            self.wait_element_text_to_be_changed()
             return True
         except TimeoutException:
             try:
-                self.wait_element_to_be_visible(*self.locator.no_device_info)
+                super().wait_element_to_be_visible(*self.locator.no_device_info)
                 return False
             except NoSuchElementException as exception:
                 Screenshot.take_screenshot(self.driver, 'no_such_element')
+
+    def element_text_changed(self, expected_text='0 devices found'):
+        element = self.find_element(*self.locator.devices_found_info)
+        return element.text != expected_text
+
+    def wait_element_text_to_be_changed(self):
+        WebDriverWait(self.driver, timeout=self.timeout).until(lambda x: self.element_text_changed())
 
     def wait_users_page_title_to_be_visible(self, max_retries=6):
         for _ in range(max_retries):

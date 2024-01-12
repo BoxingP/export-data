@@ -21,7 +21,7 @@ class DriverFactory(object):
         '-inprivate'
     ]
     COMMON_OPTIONS = [
-        '--window-size=1920,1280',
+        '--window-size=1920,2280',
         '--start-maximized'
     ]
     HEADLESS_OPTIONS = [
