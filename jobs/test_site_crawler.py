@@ -41,8 +41,9 @@ class TestSiteCrawler:
         login_page.login(user='mem', wait_element=HomePageLocators.msft_user_info_button)
         device_list = []
         for email in email_list_str.split(','):
-            user_page.open_page(url='#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers')
-            device_info = user_page.get_device_info(email=email)
-            device_list.extend(device_info)
+            user_id = user_page.get_user_id(email=email)
+            if user_id:
+                device_info = user_page.get_device_info(email=email, user_id=user_id)
+                device_list.extend(device_info)
         if device_list:
             self.generate_report(device_list)

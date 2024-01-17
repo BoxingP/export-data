@@ -36,6 +36,10 @@ class UserPageLocators(PageLocators):
     device_title = (By.XPATH, '//h2/span[contains(text(),"Device")]')
     devices_list = (By.XPATH, '//iframe[contains(@name, "DevicesList.ReactView")]')
     device_row = (By.XPATH, '//div[contains(@class, "ms-DetailsRow-fields")]')
-    no_device_info = (By.XPATH, '//label[contains(text(),"No results")]')
+    no_results_info = (By.XPATH, '//label[contains(text(),"No results")]')
     devices_found_info = (By.XPATH, '//div[@role="presentation"]//div[contains(@class, "ms-Shimmer-dataWrapper")]/div')
-    loading_bar = (By.XPATH, '//div[@role="presentation"]//div[contains(@class, "ms-Shimmer-shimmerWrapper")]')
+    device_found_loading_bar = (
+        By.XPATH, '//div[@role="presentation"]//div[contains(@class, "ms-Shimmer-shimmerGradient")]')
+    users_found_info = (By.XPATH, '//div[contains(@class, "ms-Shimmer-dataWrapper")]/div[@data-testid="resultMessage"]')
+    add_filter_loading_bar = (By.XPATH,
+                              '//div[@elementtiming and @class and count(@*)=2 and contains(@class, "ms-SearchBox")]/following::div[1]//div[contains(@class, "ms-Shimmer-shimmerWrapper")]')
