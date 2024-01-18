@@ -10,22 +10,35 @@ from utils.config import config
 
 
 class Logger(object):
-    def __init__(self, name, default_path=os.path.join(os.path.dirname(__file__), 'logging_config.json'),
+    def __init__(self, name=None, default_path=os.path.join(os.path.dirname(__file__), 'logging_config.json'),
                  default_level=logging.DEBUG):
         self.path = default_path
         self.level = default_level
+        self.caller_name = name
+        if self.caller_name is None:
+            self.detect_caller_info()
         with open(self.path, 'r', encoding='UTF-8') as file:
             logging_config = json.load(file)
         logging_config["handlers"]["info_file"]["filename"] = str(config.LOG_FILE_PATH)
-        self.logger = self.get_logger(name, logging_config)
+        self.logger = self.get_logger(f'{self.caller_name}', logging_config)
         return
 
     def get_logger(self, name, logging_config):
         logging.config.dictConfig(logging_config)
-        logging.Formatter.converter = time.gmtime
+        logging.Formatter.converter = time.localtime
         logger = logging.getLogger(name)
         logger.setLevel(self.level)
         return logger
+
+    def detect_caller_info(self):
+        stack = inspect.stack()
+        try:
+            caller_frame = stack[2]
+            caller_class = caller_frame.frame.f_locals['self'].__class__.__name__
+            caller_method = caller_frame.frame.f_code.co_name
+            self.caller_name = f'{caller_class}.{caller_method}'
+        except (AttributeError, IndexError):
+            self.caller_name = None
 
     def debug(self, msg, *args, **kwargs):
         self.logger.debug(msg, *args, **kwargs)

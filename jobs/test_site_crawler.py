@@ -7,6 +7,7 @@ from pages.login_page import LoginPage
 from pages.user_page import UserPage
 from utils.config import config
 from utils.excel_file import ExcelFile
+from utils.logger import Logger
 from utils.utils import get_base_url_by_job_name, get_current_function_name
 
 
@@ -42,6 +43,7 @@ class TestSiteCrawler:
         device_list = []
         for email in email_list_str.split(','):
             user_id = user_page.get_user_id(email=email)
+            Logger().info(msg=f"Email: {email}, User ID: {user_id}")
             if user_id:
                 device_info = user_page.get_device_info(email=email, user_id=user_id)
                 device_list.extend(device_info)
