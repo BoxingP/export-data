@@ -43,3 +43,9 @@ class UserPageLocators(PageLocators):
     users_found_info = (By.XPATH, '//div[contains(@class, "ms-Shimmer-dataWrapper")]/div[@data-testid="resultMessage"]')
     add_filter_loading_bar = (By.XPATH,
                               '//div[@elementtiming and @class and count(@*)=2 and contains(@class, "ms-SearchBox")]/following::div[1]//div[contains(@class, "ms-Shimmer-shimmerWrapper")]')
+    user_overview_title = (
+        By.XPATH, '//h2[contains(text(),",") or contains(text()," ") or contains(text(),"_") or contains(text(),"-")]')
+    user_profile = (By.XPATH, '//iframe[contains(@name, "UserProfile.ReactView")]')
+    user_email = (
+        By.XPATH, '//div[contains(@class, "ms-Persona-details")]/div[contains(@class, "ms-Persona-secondary")]/div')
+    home_title = (By.XPATH, '//h2[contains(text(),"Thermo Fisher")]')

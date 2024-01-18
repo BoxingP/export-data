@@ -22,18 +22,27 @@ class UserPage(Page):
         WebDriverWait(self.driver, timeout=self.timeout).until(EC.visibility_of_element_located(locator))
 
     def handle_session_expired(self):
-        super().wait_element_to_be_visible(*self.locator.session_expired_info)
-        self.click(*self.locator.try_again_button)
-        self.wait_url_changed_to('DevicesMenu')
+        try:
+            super().wait_element_to_be_visible(*self.locator.session_expired_info)
+            self.click(*self.locator.try_again_button)
+            return True
+        except NoSuchElementException:
+            Screenshot.take_screenshot(self.driver, 'no_such_element')
+            return False
+
+    def handle_redirect_homepage(self):
+        try:
+            super().wait_element_to_be_visible(*self.locator.home_title)
+            return True
+        except TimeoutException:
+            return False
 
     @_step
     @allure.step('Get device info')
     def get_device_info(self, email, user_id):
         device_info = []
-        self.open_page(
-            url=f'https://intune.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/Devices/userId/{user_id}/hidePreviewBanner~/true',
-            is_overwrite=True)
-        self.wait_title_to_be_visible(self.locator.device_title)
+        url = f'#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/Devices/userId/{user_id}/hidePreviewBanner~/true'
+        self.wait_title_to_be_visible(url=url, locator=self.locator.device_title)
         self.wait_frame_to_be_visible(*self.locator.devices_list)
         self.wait_element_to_be_invisible(*self.locator.device_found_loading_bar)
         if self.is_found(self.locator.devices_found_info, '0 devices found'):
@@ -68,22 +77,32 @@ class UserPage(Page):
         WebDriverWait(self.driver, timeout=self.timeout).until(
             lambda x: self.element_text_changed(locator, expected_text))
 
-    def wait_title_to_be_visible(self, locator, max_retries=6):
+    def wait_title_to_be_visible(self, url, locator, max_retries=6):
         for _ in range(max_retries):
             try:
+                self.open_page(url)
                 self.wait_element_to_be_visible(*locator)
                 return
             except TimeoutException:
-                try:
-                    self.handle_session_expired()
-                except NoSuchElementException as exception:
-                    Screenshot.take_screenshot(self.driver, 'no_such_element')
+                if self.handle_redirect_homepage():
+                    continue
+                if self.handle_session_expired():
+                    continue
 
     @_step
     @allure.step('Get user id')
-    def get_user_id(self, email):
-        self.open_page(url='#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers')
-        self.wait_title_to_be_visible(self.locator.user_title)
+    def get_user_id(self, email, max_retries=2):
+        for _ in range(max_retries):
+            user_id = self.extract_user_id(email)
+            if user_id is None or email == self.extract_email(user_id):
+                return user_id
+        return None
+
+    @_step
+    @allure.step('Extract user id')
+    def extract_user_id(self, email):
+        url = '#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers'
+        self.wait_title_to_be_visible(url=url, locator=self.locator.user_title)
         self.wait_frame_to_be_visible(*self.locator.users_list)
         self.input_text(email, *self.locator.search_field, is_overwrite=True)
         self.wait_element_to_be_invisible(*self.locator.add_filter_loading_bar)
@@ -107,3 +126,13 @@ class UserPage(Page):
             value = cell.get_text(strip=True)
             data_dict[key] = value
         return data_dict
+
+    @_step
+    @allure.step('Extract email')
+    def extract_email(self, user_id):
+        url = f'#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/{user_id}'
+        self.wait_title_to_be_visible(url=url, locator=self.locator.user_overview_title)
+        self.wait_frame_to_be_visible(*self.locator.user_profile)
+        super().wait_element_to_be_visible(*self.locator.user_email)
+        email = self.find_element(*self.locator.user_email).text
+        return email.lower().strip()
