@@ -2,6 +2,8 @@ import openpyxl
 import pandas as pd
 import wcwidth
 
+from utils.logger import Logger
+
 
 class ExcelFile(object):
     def __init__(self, name, path):
@@ -64,5 +66,7 @@ class ExcelFile(object):
             if sheet.sheet_state != 'hidden':
                 visible_sheets.append(sheet.title)
         if len(visible_sheets) != 1:
-            raise Exception(f'{excel_file}: the excel file should contain only one visible sheet')
+            error_info = f'{excel_file}: the excel file should contain only one visible sheet'
+            Logger().error(error_info)
+            raise Exception(error_info)
         return visible_sheets[index]

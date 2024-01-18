@@ -11,7 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from pages.locators import PageLocators
 from utils.config import config
-from utils.logger import _step
+from utils.logger import _step, Logger
 from utils.screenshot import Screenshot
 
 
@@ -98,7 +98,7 @@ class Page(object):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.presence_of_element_located(locator))
         except TimeoutException:
-            print(f'\n * ELEMENT NOT FOUND WITHIN {self.timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* Element not found within {self.timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{locator[1]} not found')
 
     def wait_element_to_be_clickable(self, *locator, timeout: int = None):
@@ -107,42 +107,43 @@ class Page(object):
         try:
             WebDriverWait(self.driver, timeout=timeout).until(EC.element_to_be_clickable(locator))
         except TimeoutException:
-            print(f'\n * ELEMENT NOT CLICKABLE WITHIN {timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* Element not clickable within {timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{locator[1]} not found')
 
     def wait_element_to_be_visible(self, *locator):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.visibility_of_element_located(locator))
         except TimeoutException:
-            print(f'\n * ELEMENT NOT VISIBLE WITHIN {self.timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* Element not visible within {self.timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{locator[1]} not found')
 
     def wait_element_to_be_invisible(self, *locator):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.invisibility_of_element_located(locator))
         except TimeoutException:
-            print(f'\n * ELEMENT NOT INVISIBLE WITHIN {self.timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* Element not invisible within {self.timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{locator[1]} not disappeared')
 
     def wait_text_to_be_display(self, text, *locator):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.text_to_be_present_in_element(locator, text))
         except TimeoutException:
-            print(f'\n * {text} NOT DISPLAY WITHIN {self.timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* {text} not display within {self.timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{text} not display')
 
     def wait_url_changed_to(self, url):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.url_contains(url))
         except TimeoutException:
-            print(f'\n URL NOT CHANGED TO {url} WITHIN {self.timeout} SECONDS! --> CURRENT URL IS {self.get_url()}')
+            Logger().error(
+                f'* URL not changed to {url} within {self.timeout} seconds! --> current URL is {self.get_url()}')
             Screenshot.take_screenshot(self.driver, f'url not changed to {url}')
 
     def wait_frame_to_be_visible(self, *locator):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(EC.frame_to_be_available_and_switch_to_it(locator))
         except TimeoutException:
-            print(f'\n * FRAME NOT VISIBLE WITHIN {self.timeout} SECONDS! --> {locator[1]}')
+            Logger().error(f'* Frame not visible within {self.timeout} seconds! --> {locator[1]}')
             Screenshot.take_screenshot(self.driver, f'{locator[1]} not found')
 
     def wait_element_to_be_visible_in_frame(self, frame_locator, element_locator):
@@ -154,7 +155,7 @@ class Page(object):
         try:
             WebDriverWait(self.driver, timeout=self.timeout).until(lambda driver: os.path.exists(file_path))
         except TimeoutException:
-            print(f'\n {file_path} NOT APPEAR WITHIN {self.timeout} SECONDS!')
+            Logger().error(f'* {file_path} not appear within {self.timeout} seconds!')
 
     @_step
     @allure.step('Wait for download')
@@ -181,7 +182,9 @@ class Page(object):
                     if current_size != 0 and current_size == initial_size:
                         return
             time.sleep(1)
-        raise TimeoutError(f'Download did not complete within the specified timeout seconds: {timeout}')
+        error_info = f'Download did not complete within the specified timeout seconds: {timeout}'
+        Logger().error(error_info)
+        raise TimeoutError(error_info)
 
     def add_timestamp(self, file_path: Path):
         file_path.replace(Path(file_path.parent, f'{file_path.stem}_{config.CST_NOW_STR}{file_path.suffix}'))

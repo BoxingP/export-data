@@ -7,6 +7,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from utils.config import config
+from utils.logger import Logger
 
 
 class DriverFactory(object):
@@ -81,5 +82,7 @@ class DriverFactory(object):
             driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()), options=options)
 
         if driver is None:
-            raise Exception('Provide valid driver name')
+            error_info = 'Provide valid driver name'
+            Logger().error(error_info)
+            raise Exception(error_info)
         return driver

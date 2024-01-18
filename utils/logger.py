@@ -34,9 +34,12 @@ class Logger(object):
         stack = inspect.stack()
         try:
             caller_frame = stack[2]
-            caller_class = caller_frame.frame.f_locals['self'].__class__.__name__
-            caller_method = caller_frame.frame.f_code.co_name
-            self.caller_name = f'{caller_class}.{caller_method}'
+            if 'self' in caller_frame.frame.f_locals:
+                caller_class = caller_frame.frame.f_locals['self'].__class__.__name__
+                caller_method = caller_frame.frame.f_code.co_name
+                self.caller_name = f'{caller_class}.{caller_method}'
+            else:
+                self.caller_name = caller_frame.frame.f_globals.get('__name__', None)
         except (AttributeError, IndexError):
             self.caller_name = None
 

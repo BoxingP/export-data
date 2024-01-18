@@ -5,6 +5,7 @@ import pytest
 from utils.config import config
 from utils.cron_selector import get_jobs_to_run
 from utils.excel_file import ExcelFile
+from utils.logger import Logger
 from utils.random_generator import random_browser
 
 
@@ -25,7 +26,7 @@ def main():
 
     jobs_to_run = get_jobs_to_run(config.JOB_LIST)
     mem_list = [element for element in jobs_to_run if "mem" in element]
-    print(f"Running jobs: {', '.join(mem_list)}")
+    Logger().info(f"Running jobs: {', '.join(mem_list)}")
     if jobs_to_run:
         random_browser()
         pytest.main(
