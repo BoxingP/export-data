@@ -30,7 +30,7 @@ class UserPageLocators(PageLocators):
     try_again_button = (By.ID, 'error-page-content-tryagain')
     user_title = (By.XPATH, '//h2[contains(text(),"Users")]')
     users_list = (By.XPATH, '//iframe[contains(@name, "UsersList.ReactView")]')
-    search_field = (By.XPATH, '//input[contains(@class,"ms-SearchBox-field")]')
+    search_field = (By.XPATH, '//input[contains(@id,"SearchBox")]')
     user_link = (By.XPATH,
                  '((//div[@class="ms-DetailsList-contentWrapper"]//div[@role="presentation" and @class="ms-List-cell"])[1]//a)[1]')
     device_title = (By.XPATH, '//h2/span[contains(text(),"Device")]')
